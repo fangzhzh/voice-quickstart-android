@@ -17,6 +17,7 @@
         </activity>
 
         <!-- [START fcm_listener] -->
+        <service android:name=".CallService" />
         <service
             android:name=".fcm.VoiceFirebaseMessagingService">
             <intent-filter>

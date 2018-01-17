@@ -21,6 +21,7 @@ import com.twilio.voice.CallInvite;
 import com.twilio.voice.MessageException;
 import com.twilio.voice.MessageListener;
 import com.twilio.voice.Voice;
+import com.twilio.voice.quickstart.CallService;
 import com.twilio.voice.quickstart.R;
 import com.twilio.voice.quickstart.SoundPoolManager;
 import com.twilio.voice.quickstart.VoiceActivity;
@@ -55,11 +56,15 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
-            Map<String, String> data = remoteMessage.getData();
+            final Map<String, String> data = remoteMessage.getData();
             final int notificationId = (int) System.currentTimeMillis();
             Voice.handleMessage(this, data, new MessageListener() {
                 @Override
                 public void onCallInvite(CallInvite callInvite) {
+                    Log.d(TAG, "onCallInvite VoiceFirebaseMessagingService" + callInvite.toString());
+                    String messageType = data.get("twi_message_type");
+                    Log.d(TAG, "message type" + messageType + " , callsid:" + callInvite.getCallSid());
+
                     VoiceFirebaseMessagingService.this.notify(callInvite, notificationId);
                     VoiceFirebaseMessagingService.this.sendCallInviteToActivity(callInvite, notificationId);
                 }
@@ -158,6 +163,11 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
         intent.putExtra(VoiceActivity.INCOMING_CALL_NOTIFICATION_ID, notificationId);
         intent.putExtra(VoiceActivity.INCOMING_CALL_INVITE, callInvite);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        Intent intentService = new Intent(this, CallService.class);
+        intentService.putExtra(VoiceActivity.INCOMING_CALL_NOTIFICATION_ID, notificationId);
+        intentService.putExtra(VoiceActivity.INCOMING_CALL_INVITE, callInvite);
+        startService(intentService);
     }
 
     /**
